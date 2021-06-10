@@ -1,11 +1,7 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const uuidv1 = require("uuid/v1");
-
-var validateEmail = function (email) {
-  var regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  return regex.test(email);
-};
+// const uuidv1 = require("uuid/v1");
+const { v1: uuidv1 } = require("uuid");
 
 const userSchema = mongoose.Schema(
   {
@@ -22,20 +18,18 @@ const userSchema = mongoose.Schema(
     email: {
       type: String,
       trim: true,
-      lowercase: true,
+      required: true,
       unique: true,
-      required: "Email address is required",
-      validate: [validateEmail, "Please fill a valid email address"],
-      match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        "Please fill a valid email address",
-      ],
     },
     encry_password: {
       type: String,
       required: true,
     },
     salt: String,
+    role: {
+      type: Number,
+      default: 0,
+    },
     addresses: {
       type: Array,
       default: [],
@@ -59,7 +53,7 @@ userSchema
     return this._password;
   });
 
-userSchema.method = {
+userSchema.methods = {
   authenticate: function (password) {
     return this.securePassword(password) === this.encry_password;
   },

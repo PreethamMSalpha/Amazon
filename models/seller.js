@@ -1,11 +1,7 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const uuidv2 = require("uuid/v2");
-
-var validateEmail = function (email) {
-  var regex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  return regex.test(email);
-};
+// const uuidv2 = require("uuid/v2");
+const { v2: uuidv2 } = require("uuid");
 
 const sellerSchema = mongoose.Schema(
   {
@@ -22,20 +18,18 @@ const sellerSchema = mongoose.Schema(
     email: {
       type: String,
       trim: true,
-      lowercase: true,
+      required: true,
       unique: true,
-      required: "Email address is required",
-      validate: [validateEmail, "Please fill a valid email address"],
-      match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        "Please fill a valid email address",
-      ],
     },
     encry_password: {
       type: String,
       required: true,
     },
     salt: String,
+    role: {
+      type: Number,
+      default: 1,
+    },
     addresses: {
       type: String,
       required: true,
