@@ -1,9 +1,15 @@
 const User = require("../models/user");
 const Token = require("../models/token");
+
 const { check, validationResult } = require("express-validator");
+
 var jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const bcrypt = require("bcrypt");
+
 var expressJwt = require("express-jwt");
 var nodemailer = require("nodemailer");
+const sendEmail = require("../utils/email/sendEmail");
 
 exports.signup = (req, res) => {
   const errors = validationResult(req);
@@ -38,38 +44,14 @@ exports.signup = (req, res) => {
         });
       }
 
-      //send the email
-      var transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.GMAIL_USERNAME,
-          pass: process.env.GMAIL_PASSWORD,
-        },
-      });
-      var mailOptions = {
-        from: "no-reply@amazon.com",
-        to: user.email,
-        subject: "Amazon account verification",
-        text:
-          "Hello,\n\n" +
-          "Please verify your account by clicking the link: \nhttp://" +
-          process.env.URL +
-          "/confirmation/" +
-          token.token +
-          ".\n",
-      };
-      transporter.sendMail(mailOptions, (err) => {
-        if (err) {
-          return res.status(500).send({
-            msg: err.message,
-          });
-        }
-        res
-          .status(200)
-          .send("A verification email has been sent to" + user.email + ".");
-      });
+      const link = `${process.env.URL}/confirmation?token=${token.token}&id=${user._id}`;
+      sendEmail(
+        user.email,
+        "Amazon account verification",
+        { user: user.fullName },
+        "../utils/template/confirmEmail.handlebars"
+      );
+      return link;
     });
 
     // res.send({
@@ -211,36 +193,97 @@ exports.resendTokenPost = (req, res, next) => {
         return res.status(500).send({ msg: err.message });
       }
 
-      // Send the email
-      var transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.GMAIL_USERNAME,
-          pass: process.env.GMAIL_PASSWORD,
-        },
-      });
-      var mailOptions = {
-        from: "no-reply@amazon.com",
-        to: user.email,
-        subject: "Amazon account verification",
-        text:
-          "Hello,\n\n" +
-          "Please verify your account by clicking the link: \nhttp://" +
-          process.env.URL +
-          "/confirmation/" +
-          token.token +
-          ".\n",
-      };
-      transporter.sendMail(mailOptions, (err) => {
-        if (err) {
-          return res.status(500).send({ msg: err.message });
-        }
-        res
-          .status(200)
-          .send("A verification email has been sent to " + user.email + ".");
-      });
+      const link = `${process.env.URL}/confirmation?token=${token.token}&id=${user._id}`;
+      sendEmail(
+        user.email,
+        "Amazon account verification",
+        { user: user.fullName },
+        "../utils/template/confirmEmail.handlebars"
+      );
+      return link;
     });
   });
+};
+
+exports.requestPasswordReset = async (req, res) => {
+  const errors = validationResult(req);
+  const { email } = req.body;
+
+  if (!errors.isEmpty()) {
+    return res.status(422).json({
+      errors: errors.array()[0].msg,
+    });
+  }
+
+  User.findOne({ email }, async (err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: "User email does not exist",
+      });
+    }
+
+    const token = await Token.findOne({ userId: user._id });
+
+    if (token) {
+      await token.deleteOne();
+    }
+
+    //creating new random token
+    let resetToken = crypto.randomBytes(32).toString("hex");
+    const hash = await bcrypt.hash(resetToken, Number(process.env.BCRYPT_SALT));
+
+    //saving new token
+    await new Token({
+      userId: user._id,
+      token: hash,
+      createdAt: Date.now(),
+    }).save();
+
+    const link = `${process.env.URL}/passwordReset?token=${resetToken}&id=${user._id}`;
+    sendEmail(
+      user.email,
+      "Password reset request",
+      { name: user.fullName, link: link },
+      "../utils/template/requestResetPassword.handlebars"
+    );
+    return link;
+  });
+};
+
+exports.resetPassword = async (userId, token, encry_password) => {
+  let passwordResetToken = await Token.findOne({ userId });
+  if (!passwordResetToken) {
+    throw new Error("Invalid or expired password reset token");
+  }
+
+  //comparing the token received by server with database
+  const isValid = await bcrypt.compare(token, passwordResetToken.token);
+  if (!isValid) {
+    throw new Error("Invalid or expired password reset token");
+  }
+
+  //if they are same we create new hash password
+  const hash = await bcrypt.hash(
+    encry_password,
+    Number(process.env.BCRYPT_SALT)
+  );
+
+  //updating new password
+  await User.updateOne(
+    { _id: userId },
+    { $set: { encry_password: hash } },
+    { new: true }
+  );
+
+  const user = await User.findOne({ _id: userId });
+  sendEmail(
+    user.email,
+    "Password Reset Successfully",
+    {
+      name: user.name,
+    },
+    "../utils/template/resetPasswordSuccessful.handlebars"
+  );
+  await passwordResetToken.deleteOne();
+  return true;
 };
