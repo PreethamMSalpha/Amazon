@@ -9,6 +9,7 @@ const {
   signup,
   confirmationPost,
   resendTokenPost,
+  confirmEmail,
 } = require("../controllers/auth");
 
 router.post("/signup", validator.signUpValidation, signup);
@@ -18,7 +19,7 @@ router.post("/signin", validator.signInValidation, signin);
 router.get("/signout", signout);
 
 //email verification
-router.post("/confirmation", confirmationPost); //token confirmation
+router.get("/confirmation/:token/:id", confirmEmail); //token confirmation
 router.post("/resend", resendTokenPost); //resend a new confirmation token
 
 module.exports = router;

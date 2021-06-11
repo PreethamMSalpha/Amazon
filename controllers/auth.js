@@ -24,7 +24,7 @@ exports.signup = (req, res) => {
   user.save((err, user) => {
     if (err) {
       return res.status(400).json({
-        err: "not able to save user in DB",
+        err: "not able to save user in DB, user email already exists",
       });
     }
 
@@ -44,12 +44,13 @@ exports.signup = (req, res) => {
         });
       }
 
-      const link = `${process.env.URL}/confirmation?token=${token.token}&id=${user._id}`;
+      // const link = `${process.env.URL}/confirmation?token=${token.token}&id=${user._id}`;
+      const link = `${process.env.URL}/confirmation/${token.token}/${user._id}`;
       sendEmail(
         user.email,
         "Amazon account verification",
-        { user: user.fullName },
-        "../utils/template/confirmEmail.handlebars"
+        { name: user.fullName, link: link },
+        "/utils/template/confirmEmail.handlebars"
       );
       return link;
     });
@@ -193,7 +194,7 @@ exports.resendTokenPost = (req, res, next) => {
         return res.status(500).send({ msg: err.message });
       }
 
-      const link = `${process.env.URL}/confirmation?token=${token.token}&id=${user._id}`;
+      const link = `${process.env.URL}/confirmation/${token.token}/${user._id}`;
       sendEmail(
         user.email,
         "Amazon account verification",
@@ -286,4 +287,53 @@ exports.resetPassword = async (userId, token, encry_password) => {
   );
   await passwordResetToken.deleteOne();
   return true;
+};
+
+exports.confirmEmail = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        errors: errors.array()[0].msg,
+      });
+    }
+
+    const { token, id } = req.params;
+    Token.findOne({ token: token }, (err, token) => {
+      if (!token) {
+        return res.status(400).send({
+          type: "not-verified",
+          msg: "We were unable to find a valid token. Your token my have expired.",
+        });
+      }
+
+      //finding matching user for this token
+      User.findOne({ _id: id }, (err, user) => {
+        if (!user) {
+          return res
+            .status(400)
+            .send({ msg: "We were unable to find a user for this token." });
+        }
+        if (user.isVerified) {
+          return res.status(400).send({
+            type: "already-verified",
+            msg: "This user has already been verified.",
+          });
+        }
+
+        // Verify and save the user
+        user.isVerified = true;
+
+        user.save((err) => {
+          if (err) {
+            return res.status(500).send({ msg: err.message });
+          }
+          res.status(200).send("The account has been verified. Please log in.");
+        });
+      });
+    });
+  } catch (error) {
+    res.send("error");
+  }
 };

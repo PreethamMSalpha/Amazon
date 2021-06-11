@@ -1,5 +1,8 @@
 var expressJwt = require("express-jwt");
 var nodemailer = require("nodemailer");
+const handlebars = require("handlebars");
+const fs = require("fs");
+const path = require("path");
 
 const sendEmail = async (email, subject, payload, template) => {
   try {
@@ -14,8 +17,7 @@ const sendEmail = async (email, subject, payload, template) => {
       },
     });
 
-    //reading template files
-    const source = fs.readFileSync(path.join(__dirname, template), "utf8");
+    const source = fs.readFileSync(path.join(process.cwd(), template), "utf8");
     const compiledTemplate = handlebars.compile(source);
 
     var mailOptions = {
@@ -35,6 +37,8 @@ const sendEmail = async (email, subject, payload, template) => {
         success: true,
       });
     });
+
+    // console.log("send email");
   } catch (error) {
     return error;
   }
