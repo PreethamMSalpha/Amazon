@@ -114,54 +114,58 @@ exports.signout = (req, res) => {
   });
 };
 
-exports.confirmationPost = (req, res, next) => {
-  const errors = validationResult(req);
+exports.confirmEmail = async (req, res) => {
+  try {
+    const errors = validationResult(req);
 
-  if (!errors.isEmpty()) {
-    return res.status(422).json({
-      errors: errors.array()[0].msg,
-    });
-  }
-
-  //find a matching token
-  Token.findOne({ token: req.body.token }, (err, token) => {
-    if (!token) {
-      return res.status(400).send({
-        type: "not-verified",
-        msg: "We were unable to find a valid token. Your token my have expired.",
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        errors: errors.array()[0].msg,
       });
     }
 
-    //finding matching user for this token
-    User.findOne({ _id: token.userId, email: req.body.email }, (err, user) => {
-      if (!user) {
-        return res
-          .status(400)
-          .send({ msg: "We were unable to find a user for this token." });
-      }
-      if (user.isVerified) {
+    const { token, id } = req.params;
+    Token.findOne({ token: token }, (err, token) => {
+      if (!token) {
         return res.status(400).send({
-          type: "already-verified",
-          msg: "This user has already been verified.",
+          type: "not-verified",
+          msg: "We were unable to find a valid token. Your token my have expired.",
         });
       }
 
-      // Verify and save the user
-      user.isVerified = true;
-
-      user.save((err) => {
-        if (err) {
-          return res.status(500).send({ msg: err.message });
+      //finding matching user for this token
+      User.findOne({ _id: id }, (err, user) => {
+        if (!user) {
+          return res
+            .status(400)
+            .send({ msg: "We were unable to find a user for this token." });
         }
-        res.status(200).send("The account has been verified. Please log in.");
+        if (user.isVerified) {
+          return res.status(400).send({
+            type: "already-verified",
+            msg: "This user has already been verified.",
+          });
+        }
+
+        // Verify and save the user
+        user.isVerified = true;
+
+        user.save((err) => {
+          if (err) {
+            return res.status(500).send({ msg: err.message });
+          }
+          res.status(200).send("The account has been verified. Please log in.");
+        });
       });
     });
-  });
+  } catch (error) {
+    res.send("error");
+  }
 };
 
 exports.resendTokenPost = (req, res, next) => {
   // Check for validation errors
-  var errors = req.validationErrors();
+  const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
     return res.status(422).json({
@@ -198,8 +202,8 @@ exports.resendTokenPost = (req, res, next) => {
       sendEmail(
         user.email,
         "Amazon account verification",
-        { user: user.fullName },
-        "../utils/template/confirmEmail.handlebars"
+        { name: user.fullName, link: link },
+        "/utils/template/confirmEmail.handlebars"
       );
       return link;
     });
@@ -287,53 +291,4 @@ exports.resetPassword = async (userId, token, encry_password) => {
   );
   await passwordResetToken.deleteOne();
   return true;
-};
-
-exports.confirmEmail = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      return res.status(422).json({
-        errors: errors.array()[0].msg,
-      });
-    }
-
-    const { token, id } = req.params;
-    Token.findOne({ token: token }, (err, token) => {
-      if (!token) {
-        return res.status(400).send({
-          type: "not-verified",
-          msg: "We were unable to find a valid token. Your token my have expired.",
-        });
-      }
-
-      //finding matching user for this token
-      User.findOne({ _id: id }, (err, user) => {
-        if (!user) {
-          return res
-            .status(400)
-            .send({ msg: "We were unable to find a user for this token." });
-        }
-        if (user.isVerified) {
-          return res.status(400).send({
-            type: "already-verified",
-            msg: "This user has already been verified.",
-          });
-        }
-
-        // Verify and save the user
-        user.isVerified = true;
-
-        user.save((err) => {
-          if (err) {
-            return res.status(500).send({ msg: err.message });
-          }
-          res.status(200).send("The account has been verified. Please log in.");
-        });
-      });
-    });
-  } catch (error) {
-    res.send("error");
-  }
 };
