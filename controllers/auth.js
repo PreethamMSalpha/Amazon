@@ -44,7 +44,6 @@ exports.signup = (req, res) => {
         });
       }
 
-      // const link = `${process.env.URL}/confirmation?token=${token.token}&id=${user._id}`;
       const link = `${process.env.URL}/confirmation/${token.token}/${user._id}`;
       sendEmail(
         user.email,
@@ -55,11 +54,11 @@ exports.signup = (req, res) => {
       return link;
     });
 
-    // res.send({
-    //   name: user.fullName,
-    //   email: user.email,
-    //   id: user._id,
-    // });
+    res.send({
+      name: user.fullName,
+      email: user.email,
+      id: user._id,
+    });
   });
 };
 
@@ -101,7 +100,6 @@ exports.signin = (req, res) => {
 
     //send response to front end
     const { _id, fullName, email, role } = user;
-    // res.send({ token: token, user: user.toJSON() });
     return res.json({ token, user: { _id, fullName, email, role } });
   });
 };
@@ -205,7 +203,10 @@ exports.resendTokenPost = (req, res, next) => {
         { name: user.fullName, link: link },
         "/utils/template/confirmEmail.handlebars"
       );
-      return link;
+      // return link;
+      res.json({
+        msg: "Email cofirmation has been send to your email",
+      });
     });
   });
 };
@@ -233,62 +234,89 @@ exports.requestPasswordReset = async (req, res) => {
       await token.deleteOne();
     }
 
-    //creating new random token
-    let resetToken = crypto.randomBytes(32).toString("hex");
-    const hash = await bcrypt.hash(resetToken, Number(process.env.BCRYPT_SALT));
+    //creating new token
+    const jwtToken = jwt.sign({ _id: user._id }, process.env.PASSWORD_RESET);
 
-    //saving new token
     await new Token({
       userId: user._id,
-      token: hash,
+      token: jwtToken,
       createdAt: Date.now(),
     }).save();
 
-    const link = `${process.env.URL}/passwordReset?token=${resetToken}&id=${user._id}`;
+    // console.log("token created");
+
+    const link = `${process.env.URL}/passwordReset/${jwtToken}/${user._id}`;
+
     sendEmail(
       user.email,
-      "Password reset request",
+      "Amazon Password reset request",
       { name: user.fullName, link: link },
-      "../utils/template/requestResetPassword.handlebars"
+      "/utils/template/requestResetPassword.handlebars"
     );
     return link;
   });
+
+  res.status(200).json({
+    msg: "Password reset request is successful, please check email",
+  });
 };
 
-exports.resetPassword = async (userId, token, encry_password) => {
-  let passwordResetToken = await Token.findOne({ userId });
-  if (!passwordResetToken) {
-    throw new Error("Invalid or expired password reset token");
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        errors: errors.array()[0].msg,
+      });
+    }
+
+    const { token, id } = req.params;
+    const password = req.body.password;
+
+    let passwordResetToken = await Token.findOne({ userId: id });
+    if (!passwordResetToken) {
+      throw new Error("Invalid or expired password reset token");
+    }
+
+    //comparing the token received by server with database
+    if (token !== passwordResetToken.token) {
+      throw new Error("Invalid or expired password reset token");
+    }
+
+    //if they are same we create new hash password
+    const user = await User.findOne({ _id: id });
+    console.log("salt", user.salt);
+    const hash = crypto
+      .createHmac("sha256", user.salt)
+      .update(password)
+      .digest("hex");
+    console.log("hash password", hash);
+
+    //updating new password
+    await User.updateOne(
+      { _id: id },
+      { $set: { encry_password: hash } }
+      // { new: true }
+    );
+
+    sendEmail(
+      user.email,
+      "Password Reset Successfully",
+      {
+        name: user.fullName,
+      },
+      "/utils/template/resetPasswordSuccessful.handlebars"
+    );
+
+    await passwordResetToken.deleteOne();
+
+    res.status(200).json({
+      msg: "password changed successfully",
+    });
+  } catch (error) {
+    return res.send({
+      msg: error,
+    });
   }
-
-  //comparing the token received by server with database
-  const isValid = await bcrypt.compare(token, passwordResetToken.token);
-  if (!isValid) {
-    throw new Error("Invalid or expired password reset token");
-  }
-
-  //if they are same we create new hash password
-  const hash = await bcrypt.hash(
-    encry_password,
-    Number(process.env.BCRYPT_SALT)
-  );
-
-  //updating new password
-  await User.updateOne(
-    { _id: userId },
-    { $set: { encry_password: hash } },
-    { new: true }
-  );
-
-  const user = await User.findOne({ _id: userId });
-  sendEmail(
-    user.email,
-    "Password Reset Successfully",
-    {
-      name: user.name,
-    },
-    "../utils/template/resetPasswordSuccessful.handlebars"
-  );
-  await passwordResetToken.deleteOne();
-  return true;
 };

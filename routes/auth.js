@@ -7,9 +7,10 @@ const {
   signout,
   signin,
   signup,
-  confirmationPost,
   resendTokenPost,
   confirmEmail,
+  requestPasswordReset,
+  resetPassword,
 } = require("../controllers/auth");
 
 router.post("/signup", validator.signUpValidation, signup);
@@ -21,5 +22,9 @@ router.get("/signout", signout);
 //email verification
 router.get("/confirmation/:token/:id", confirmEmail); //token confirmation
 router.post("/resend", resendTokenPost); //resend a new confirmation token
+
+//password reset
+router.post("/requestResetPassword", requestPasswordReset);
+router.get("/passwordReset/:token/:id", resetPassword);
 
 module.exports = router;
