@@ -6,7 +6,7 @@ const reqType = {
   required: true,
 };
 
-const productSchema = mongoose.model(
+const productSchema = mongoose.Schema(
   {
     productName: reqType,
     brand: reqType,
@@ -24,6 +24,8 @@ const productSchema = mongoose.model(
       default: 0,
     },
     images: {
+      // type: Array,
+      //change here for array of images
       data: Buffer,
       contentType: String,
     },
@@ -42,7 +44,7 @@ const productSchema = mongoose.model(
     seller: {
       type: ObjectId,
       ref: "Seller",
-      required: true,
+      // required: true, //TODO: uncomment later
     },
     review: {
       type: ObjectId,
@@ -52,4 +54,4 @@ const productSchema = mongoose.model(
   { timestamps: true }
 );
 
-module.exports = mongoose.model(Product, productSchema);
+module.exports = mongoose.model("Product", productSchema);
