@@ -23,8 +23,52 @@ function Header() {
 
         {/** search bar */}
         <div className="ml-6 hidden sm:flex items-center h-10 rounded-md flex-grow cursor-pointer bg-yellow-400 hover:bg-yellow-500">
+          <select class="hidden  w-1/6 text-sm object-contain p-2 h-full bg-gray-100 flex-shrink focus:outline-none rounded-l-md">
+            <option value="0">All Categories</option>
+            <option value="1">Deals</option>
+            <option value="2">Alexa Skills</option>
+            <option value="3">Amazon Devices</option>
+            <option value="4">Amazon Fashion</option>
+            <option value="5">Amazon Pantry</option>
+            <option value="6">Appliances</option>
+            <option value="7">Apps &amp; Games</option>
+            <option value="8">Baby</option>
+            <option value="9">Beauty</option>
+            <option value="10">Big Bazaar</option>
+            <option value="11">Books</option>
+            <option value="12">Car &amp; Motorbike</option>
+            <option value="13">Clothing &amp; Accessories</option>
+            <option value="14">Collectibles</option>
+            <option value="15">Computers &amp; Accessories</option>
+            <option value="16">Electronics</option>
+            <option value="17">Furniture</option>
+            <option value="18">Garden &amp; Outdoors</option>
+            <option value="19">Gift Cards</option>
+            <option value="20">Grocery &amp; Gourmet Foods</option>
+            <option value="21">Health &amp; Personal Care</option>
+            <option value="22">Home &amp; Kitchen</option>
+            <option value="23">Industrial &amp; Scientific</option>
+            <option value="24">Jewellery</option>
+            <option value="25">Kindle Store</option>
+            <option value="26">Luggage &amp; Bags</option>
+            <option value="27">Luxury Beauty</option>
+            <option value="28">Movies &amp; TV Shows</option>
+            <option value="29">Music</option>
+            <option value="30">Musical Instruments</option>
+            <option value="31">Office Products</option>
+            <option value="32">Pet Supplies</option>
+            <option value="33">Prime Video</option>
+            <option value="34">Shoes &amp; Handbags</option>
+            <option value="35">Software</option>
+            <option value="36">Sports, Fitness &amp; Outdoors</option>
+            <option value="37">Tools &amp; Home Improvement</option>
+            <option value="38">Toys &amp; Games</option>
+            <option value="39">Under ₹500</option>
+            <option value="40">Video Games</option>
+            <option value="41">Watches</option>
+          </select>
           <input
-            className="p-2 h-full w-6 flex-grow flex-shrink rounded-l-md focus:outline-none px-4"
+            className="rounded-l-md p-2 h-full w-6 flex-grow flex-shrink focus:outline-none px-4"
             type="text"
           />
           <SearchIcon className="h-12 p-4" />
@@ -32,17 +76,17 @@ function Header() {
 
         {/**right menus */}
         <div className="text-white flex items-center text-xs space-x-6 m-6 whitespace-nowrap">
-          <div className="link">
+          <div className="def_hover">
             <p>Hello, Sign in</p>
             <p className="font-extrabold md:text-sm">Account & Lists</p>
           </div>
 
-          <div className="link">
+          <div className="def_hover">
             <p>Returns</p>
             <p className="font-extrabold md:text-sm">& Orders</p>
           </div>
 
-          <div className="relative link flex items-center">
+          <div className="relative def_hover flex items-center">
             <span className="absolute top-0 right-0 md:right-10 h-4 w-4 bg-yellow-400 text-center rounded-full text-black font-bold">
               0
             </span>
@@ -66,6 +110,8 @@ function Header() {
         <p className="link hidden md:inline-flex">Electronics</p>
         <p className="link">Prime</p>
         <p className="link">New Releases</p>
+        <p className="link">Customer Service</p>
+        <p className="link">Amazon Pay</p>
       </div>
     </div>
   );

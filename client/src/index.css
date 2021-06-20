@@ -6,4 +6,8 @@
     .link {
         @apply cursor-pointer hover:underline border-white;
     }
+    .def_hover {
+        @apply border border-separate border-double border-transparent hover:border-current cursor-pointer select-none;
+    }
 }
+/* @apply border:5px solid #333333 overflow: hidden */

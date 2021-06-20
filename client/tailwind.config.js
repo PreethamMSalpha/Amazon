@@ -12,7 +12,11 @@ module.exports = {
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      padding: ["hover"],
+      borderStyle: ["hover"],
+      borderCollapse: ["hover", "focus"],
+    },
   },
   plugins: [],
 };
