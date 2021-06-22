@@ -7,8 +7,12 @@ module.exports = {
         amazon_blue: {
           light: "#232F3E",
           DEFAULT: "#131921",
+          form_inp: "orange",
         },
       },
+    },
+    container: {
+      center: true,
     },
   },
   variants: {

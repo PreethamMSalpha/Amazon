@@ -100,18 +100,18 @@ function Header() {
 
       {/*bottom nav */}
       <div className="flex items-center space-x-3 p-2 pl-6 bg-amazon_blue-light text-white text-sm">
-        <p className="link flex items-center">
+        <p className="def_hover flex items-center">
           <MenuIcon className="h-6 mr-1 " />
           All
         </p>
-        <p className="link">Best Sellers</p>
-        <p className="link hidden md:inline-flex">Mobiles</p>
-        <p className="link hidden md:inline-flex">Fashion</p>
-        <p className="link hidden md:inline-flex">Electronics</p>
-        <p className="link">Prime</p>
-        <p className="link">New Releases</p>
-        <p className="link">Customer Service</p>
-        <p className="link">Amazon Pay</p>
+        <p className="def_hover">Best Sellers</p>
+        <p className="def_hover hidden md:inline-flex">Mobiles</p>
+        <p className="def_hover hidden md:inline-flex">Fashion</p>
+        <p className="def_hover hidden md:inline-flex">Electronics</p>
+        <p className="def_hover">Prime</p>
+        <p className="def_hover">New Releases</p>
+        <p className="def_hover">Customer Service</p>
+        <p className="def_hover">Amazon Pay</p>
       </div>
     </div>
   );

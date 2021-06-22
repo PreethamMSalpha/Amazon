@@ -9,5 +9,8 @@
     .def_hover {
         @apply border border-separate border-double border-transparent hover:border-current cursor-pointer select-none;
     }
+    .form_inp{
+        @apply h-8 border border-gray-400 rounded outline-none w-full mb-2 px-1 focus:border-collapse focus:border-amazon_blue-form_inp focus:shadow-md;
+    }
 }
 /* @apply border:5px solid #333333 overflow: hidden */
