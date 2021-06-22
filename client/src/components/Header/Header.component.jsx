@@ -1,5 +1,6 @@
 import React from "react";
 import "./Header.scss";
+import { Link } from "react-router-dom";
 import {
   MenuIcon,
   SearchIcon,
@@ -12,13 +13,15 @@ function Header() {
       {/*top nav */}
       <div className="flex items-center bg-amazon_blue  flex-grow h-16">
         <div className="mt-2 ml-6 flex items-center flex-grow sm:flex-grow-0">
-          <img
-            src="https://i.ibb.co/rfvRW5q/amazon-logo.png"
-            alt="logo"
-            width={100}
-            height={40}
-            className="cursor-pointer object-contain"
-          />
+          <Link to="/">
+            <img
+              src="https://i.ibb.co/rfvRW5q/amazon-logo.png"
+              alt="logo"
+              width={100}
+              height={40}
+              className="cursor-pointer object-contain"
+            />
+          </Link>
         </div>
 
         {/** search bar */}

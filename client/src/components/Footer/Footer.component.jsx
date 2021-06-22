@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Footer() {
   return (
@@ -42,18 +43,22 @@ function Footer() {
       <div className="border border-solid border-gray-600"></div>
       <div className="flex flex-col bg-amazon_blue">
         <div className="m-6">
-          <img
-            src="https://i.ibb.co/rfvRW5q/amazon-logo.png"
-            alt="logo"
-            width={100}
-            height={40}
-            className="cursor-pointer object-contain m-auto"
-          />
+          <Link to="/">
+            <img
+              src="https://i.ibb.co/rfvRW5q/amazon-logo.png"
+              alt="logo"
+              width={100}
+              height={40}
+              className="cursor-pointer object-contain m-auto"
+            />
+          </Link>
           <div className="text-white flex text-xs m-auto mt-6 justify-center text-center">
             <p className="link mx-2">Conditions of Use & Sale</p>
             <p className="link mx-2">Privacy Notice</p>
             <p className="link mx-2">Interest-Based Ads</p>
-            <span className="mx-2">© 1996-2021, Amazon.com, Inc. or its affiliates</span>
+            <span className="mx-2">
+              © 1996-2021, Amazon.com, Inc. or its affiliates
+            </span>
           </div>
         </div>
       </div>

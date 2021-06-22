@@ -1,15 +1,18 @@
 import React from "react";
 import { InformationCircleIcon } from "@heroicons/react/outline";
+import { Link } from "react-router-dom";
 
 function SignUp() {
   return (
     <div className="m-auto flex flex-col align-middle mb-6">
       <div className="m-auto mt-5 mb-5 object-cover justify-center">
-        <img
-          src="https://i.ibb.co/Z6GzWmS/amazon-signup.png"
-          alt="amazon logo"
-          width="150px"
-        />
+        <Link to="/">
+          <img
+            src="https://i.ibb.co/Z6GzWmS/amazon-signup.png"
+            alt="amazon logo"
+            width="150px"
+          />
+        </Link>
       </div>
       <div className="w-96 m-auto object-contain flex flex-col rounded-lg shadow-md border border-solid border-gray-300 p-4">
         <h1 className="font-normal text-3xl mb-4">Create Account</h1>
@@ -38,7 +41,9 @@ function SignUp() {
         <div>
           <h6 className="m-auto text-sm text-gray-500 flex justify-start">
             Already have an account?&nbsp;
-            <a className="text-blue-500 hover:underline">Sign in</a>
+            <Link to="/signin">
+              <a className="text-blue-500 hover:underline">Sign in</a>
+            </Link>
           </h6>
         </div>
       </div>
